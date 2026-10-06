@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Grade 8 - A Helping Hand Assessment Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            purple: '#6C5CE7',
+                            pink: '#FD79A8',
+                            yellow: '#FFEAA7',
+                            green: '#00B894',
+                            orange: '#E17055',
+                            blue: '#0984E3',
+                            dark: '#2D3436',
+                            light: '#F8F9FA'
+                        }
+                    },
+                    boxShadow: {
+                        'fun': '0 8px 0px 0px rgba(0, 0, 0, 0.15)',
+                        'fun-sm': '0 4px 0px 0px rgba(0, 0, 0, 0.15)',
+                        'fun-lg': '0 12px 0px 0px rgba(0, 0, 0, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F3F4F6;
+            background-image: radial-gradient(#0984E3 0.75px, transparent 0.75px), radial-gradient(#00B894 0.75px, #F3F4F6 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            user-select: none;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @keyframes bounce-gentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-bounce-gentle {
+            animation: bounce-gentle 2s infinite ease-in-out;
+        }
+
+        .pulse-red {
+            animation: pulse-red-anim 1s infinite alternate;
+        }
+        @keyframes pulse-red-anim {
+            0% { background-color: #ef4444; color: #ffffff; }
+            100% { background-color: #fee2e2; color: #dc2626; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between antialiased selection:bg-teal-300 selection:text-teal-900">
+
+    <script>
+        /********************************************************************************
+         * TEACHER CONFIGURATION SECTION
+         * Insert your Google Apps Script Web App URL below between the single quotes.
+         * Example: const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+         ********************************************************************************/
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxKDfyRq3HG8mXxr48VKldUJj8tIAyfcm49FHs2E00JdAlhhRVvOXMdlup2wRJaEWA/exec"; // <-- PASTE YOUR GOOGLE APPS SCRIPT URL HERE!
+        
+        // Passcode configuration
+        const SYSTEM_PASSCODE = "SMP2026";
+    </script>
+
+    <!-- Navigation Header -->
+    <header class="bg-white border-b-4 border-slate-900 sticky top-0 z-30 px-4 py-3 shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-blue flex items-center justify-center text-white text-xl font-black shadow-fun-sm border-2 border-slate-900">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-black tracking-wide text-slate-800 leading-tight">ENGLISH FUN TEST</h1>
+                    <p class="text-xs font-bold text-brand-blue">Fase D Grade 8 • Unit 3: A Helping Hand (Narrative Text & Character Traits)</p>
+                </div>
+            </div>
+
+            <!-- Quiz Timer & Status (Visible only during exam) -->
+            <div id="header-status-bar" class="hidden flex items-center gap-3">
+                <div class="bg-amber-100 border-2 border-slate-900 rounded-xl px-3 py-1.5 flex items-center space-x-2 shadow-fun-sm">
+                    <i class="fa-solid fa-clock text-amber-600 text-lg"></i>
+                    <div>
+                        <span class="text-[10px] uppercase font-black text-amber-700 block -mb-1">Time Left</span>
+                        <span id="timer-display" class="font-black text-base md:text-lg text-slate-800">60:00</span>
+                    </div>
+                </div>
+
+                <!-- Cheating Counter Header -->
+                <div id="violation-badge" class="bg-red-100 border-2 border-slate-900 rounded-xl px-3 py-1.5 flex items-center space-x-2 shadow-fun-sm">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-lg"></i>
+                    <div>
+                        <span class="text-[10px] uppercase font-black text-red-700 block -mb-1">Violations</span>
+                        <span id="header-violation-count" class="font-black text-base text-red-600">0 / 3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher Script Guide Button -->
+            <button onclick="openTeacherModal()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border-2 border-slate-900 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-fun-sm">
+                <i class="fa-solid fa-code text-indigo-600"></i>
+                <span>GAS Guide for Teacher</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full p-4 flex-grow flex flex-col justify-center my-4">
+
+        <!-- ================= SCREEN 1: LOGIN / START SCREEN ================= -->
+        <div id="screen-welcome" class="max-w-2xl mx-auto w-full bg-white border-4 border-slate-900 rounded-3xl p-6 md:p-8 shadow-fun-lg relative overflow-hidden">
+            <!-- Decorative Banner elements -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-brand-yellow rounded-full border-4 border-slate-900 -z-0"></div>
+            <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-brand-pink rounded-full border-4 border-slate-900 -z-0"></div>
+
+            <div class="relative z-10">
+                <div class="text-center mb-6">
+                    <span class="inline-block px-4 py-1.5 bg-brand-yellow border-2 border-slate-900 rounded-full text-xs font-black uppercase tracking-wider text-slate-900 shadow-fun-sm mb-3">
+                        <i class="fa-solid fa-star mr-1"></i> Formative Assessment Unit 3
+                    </span>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-slate-800 tracking-tight">A Helping Hand: Friendship Stories 🤝</h2>
+                    <p class="text-sm md:text-base text-slate-600 font-medium mt-1">Narrative Text, Character Traits & Behavior (30 Questions)</p>
+                </div>
+
+                <!-- Guidelines Card -->
+                <div class="bg-blue-50 border-2 border-slate-900 rounded-2xl p-4 mb-6 shadow-fun-sm text-xs md:text-sm text-slate-700">
+                    <h3 class="font-black text-slate-900 uppercase tracking-wide flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-circle-info text-brand-blue"></i> Rules & Guidelines:
+                    </h3>
+                    <ul class="space-y-1.5 list-disc list-inside font-medium text-slate-700">
+                        <li>Total Duration: <span class="font-bold text-slate-900">60 Minutes</span>.</li>
+                        <li>Question Count: <span class="font-bold text-slate-900">30 Questions</span> (Multiple Choice).</li>
+                        <li><span class="font-bold text-red-600"><i class="fa-solid fa-shield-cat"></i> Anti-Cheating Active:</span> Switching tabs or leaving this window is strictly tracked. Maximum <span class="font-bold text-red-600">3 violations</span> will reset your session.</li>
+                    </ul>
+                </div>
+
+                <!-- Registration Form -->
+                <form id="login-form" onsubmit="handleStartExam(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Student Full Name <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <input type="text" id="input-student-name" required placeholder="e.g. Ahmad Rizky" 
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-900 rounded-xl font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-200 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Class / Grade <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-school"></i>
+                                </span>
+                                <select id="input-student-class" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-900 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-200 transition">
+                                    <option value="" disabled selected>Select Class...</option>
+                                    <option value="Class 8A">Class 8A</option>
+                                    <option value="Class 8B">Class 8B</option>
+                                    <option value="Class 8C">Class 8C</option>
+                                    <option value="Class 8D">Class 8D</option>
+                                    <option value="Class 8E">Class 8E</option>
+                                    <option value="Class 8F">Class 8F</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Assessment Passcode <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-key"></i>
+                                </span>
+                                <input type="password" id="input-passcode" required placeholder="Enter Passcode..." 
+                                    class="w-full pl-10 pr-10 py-3 bg-slate-50 border-2 border-slate-900 rounded-xl font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-200 transition">
+                                <button type="button" onclick="togglePasscodeVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-800">
+                                    <i id="passcode-eye-icon" class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="login-error-msg" class="hidden p-3 bg-red-100 border-2 border-red-500 rounded-xl text-red-700 text-xs font-bold text-center">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect Passcode! Please ask your teacher.
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-brand-green hover:bg-emerald-500 text-white font-black text-lg border-4 border-slate-900 rounded-2xl shadow-fun transition transform active:translate-y-1 active:shadow-none flex items-center justify-center gap-2">
+                        <span>START ASSESSMENT</span>
+                        <i class="fa-solid fa-circle-play"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- ================= SCREEN 2: EXAM SCREEN ================= -->
+        <div id="screen-exam" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left Side / Main Quiz Area (8 cols) -->
+            <div class="lg:col-span-8 space-y-4">
+                
+                <!-- Main Card -->
+                <div class="bg-white border-4 border-slate-900 rounded-3xl p-5 md:p-7 shadow-fun-lg relative">
+                    
+                    <!-- Question Header & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-slate-200 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span id="question-number-badge" class="px-3 py-1 bg-brand-blue text-white font-black rounded-xl text-sm border-2 border-slate-900 shadow-fun-sm">
+                                Q #1
+                            </span>
+                            <span id="question-level-badge" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 border-2 border-emerald-800 font-bold rounded-xl text-xs">
+                                Easy
+                            </span>
+                            <span id="question-topic-badge" class="hidden md:inline-block px-2.5 py-1 bg-slate-100 text-slate-700 border-2 border-slate-800 font-bold rounded-xl text-xs">
+                                Character Traits
+                            </span>
+                        </div>
+
+                        <!-- Mark for Review Checkbox Button -->
+                        <button type="button" id="btn-toggle-doubt" onclick="toggleDoubtState()" class="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border-2 border-slate-900 rounded-xl text-xs flex items-center gap-1.5 transition">
+                            <i id="doubt-icon" class="fa-regular fa-bookmark text-amber-700"></i>
+                            <span id="doubt-text">Mark for Review</span>
+                        </button>
+                    </div>
+
+                    <!-- Question Content Area -->
+                    <div id="question-box" class="space-y-4">
+                        <!-- Reading Passage / Dialogue Box -->
+                        <div id="passage-container" class="bg-slate-50 border-2 border-slate-900 rounded-2xl p-4 text-slate-800 text-sm md:text-base leading-relaxed font-medium relative">
+                            <span class="absolute -top-3 left-4 bg-brand-pink text-white border-2 border-slate-900 px-2 py-0.5 rounded-md text-[10px] font-black uppercase">
+                                Text / Context
+                            </span>
+                            <div id="passage-text" class="mt-1 whitespace-pre-line font-medium">Loading story text...</div>
+                        </div>
+
+                        <!-- Optional Question Image Placeholder -->
+                        <div id="question-image-box" class="hidden my-3 text-center">
+                            <img id="question-image" src="" alt="Question Image" class="max-h-60 mx-auto rounded-xl border-2 border-slate-900 shadow-fun-sm object-cover" onerror="this.classList.add('hidden')">
+                        </div>
+
+                        <!-- Question Prompt -->
+                        <p id="question-prompt" class="font-extrabold text-base md:text-lg text-slate-900 pt-1">
+                            Question text here?
+                        </p>
+
+                        <!-- Answer Options Grid -->
+                        <div id="options-container" class="space-y-3 pt-2">
+                            <!-- Dynamically populated options A, B, C, D -->
+                        </div>
+                    </div>
+
+                    <!-- Footer Navigation Controls -->
+                    <div class="flex items-center justify-between gap-2 border-t-2 border-slate-200 pt-5 mt-6">
+                        <button id="btn-prev" onclick="goToPrevQuestion()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold rounded-xl border-2 border-slate-900 shadow-fun-sm text-sm flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Previous</span>
+                        </button>
+
+                        <button id="btn-next" onclick="goToNextQuestion()" class="px-5 py-2.5 bg-brand-blue hover:bg-blue-600 text-white font-extrabold rounded-xl border-2 border-slate-900 shadow-fun-sm text-sm flex items-center gap-2 transition">
+                            <span>Next</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+
+                        <button id="btn-finish-exam" onclick="confirmSubmitExam()" class="hidden px-5 py-2.5 bg-brand-green hover:bg-emerald-600 text-white font-extrabold rounded-xl border-2 border-slate-900 shadow-fun-sm text-sm flex items-center gap-2 transition">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit All</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Side / Question Palette Grid (4 cols) -->
+            <div class="lg:col-span-4 space-y-4">
+                <div class="bg-white border-4 border-slate-900 rounded-3xl p-5 shadow-fun-lg">
+                    <h3 class="font-black text-slate-800 text-base mb-3 flex items-center justify-between">
+                        <span><i class="fa-solid fa-grip mr-1 text-brand-blue"></i> Question Palette</span>
+                        <span id="answered-count-badge" class="text-xs bg-blue-100 text-blue-800 px-2.5 py-1 rounded-lg border border-blue-300 font-bold">0 / 30</span>
+                    </h3>
+
+                    <!-- Status Legend -->
+                    <div class="grid grid-cols-3 gap-1.5 mb-4 text-[11px] font-bold">
+                        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-lg border border-slate-300">
+                            <span class="w-3 h-3 rounded-full bg-slate-200 border border-slate-600 inline-block"></span>
+                            <span>Unanswered</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-lg border border-slate-300">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 border border-slate-900 inline-block"></span>
+                            <span>Answered</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-lg border border-slate-300">
+                            <span class="w-3 h-3 rounded-full bg-amber-400 border border-slate-900 inline-block"></span>
+                            <span>Review</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Number Grid -->
+                    <div id="question-palette-grid" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto custom-scrollbar p-1">
+                        <!-- Populated dynamically 1 to 30 -->
+                    </div>
+
+                    <!-- Direct Submit Button -->
+                    <div class="mt-5 pt-3 border-t-2 border-slate-200">
+                        <button onclick="confirmSubmitExam()" class="w-full py-3 bg-brand-orange hover:bg-orange-600 text-white font-extrabold text-sm border-2 border-slate-900 rounded-xl shadow-fun-sm transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Finish Exam</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ================= SCREEN 3: RESULT SCREEN ================= -->
+        <div id="screen-result" class="hidden max-w-3xl mx-auto w-full bg-white border-4 border-slate-900 rounded-3xl p-6 md:p-8 shadow-fun-lg">
+            
+            <div class="text-center mb-6">
+                <div id="result-icon-container" class="w-20 h-20 mx-auto rounded-2xl bg-amber-100 border-4 border-slate-900 flex items-center justify-center text-4xl mb-3 shadow-fun">
+                    🏆
+                </div>
+                <h2 id="result-title" class="text-3xl font-black text-slate-800">Assessment Complete!</h2>
+                <p id="result-subtitle" class="text-sm font-semibold text-slate-600 mt-1">Great job completing your Grade 8 English assessment.</p>
+            </div>
+
+            <!-- Score Summary Cards Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="bg-blue-50 border-2 border-slate-900 rounded-2xl p-3 text-center shadow-fun-sm">
+                    <span class="text-[11px] font-black uppercase text-blue-700 block">Final Score</span>
+                    <span id="res-score" class="text-3xl font-black text-brand-blue">0</span>
+                    <span class="text-[10px] text-slate-500 font-bold block">/ 100</span>
+                </div>
+
+                <div class="bg-emerald-50 border-2 border-slate-900 rounded-2xl p-3 text-center shadow-fun-sm">
+                    <span class="text-[11px] font-black uppercase text-emerald-700 block">Correct Answers</span>
+                    <span id="res-correct" class="text-3xl font-black text-emerald-600">0</span>
+                    <span class="text-[10px] text-slate-500 font-bold block">questions</span>
+                </div>
+
+                <div class="bg-rose-50 border-2 border-slate-900 rounded-2xl p-3 text-center shadow-fun-sm">
+                    <span class="text-[11px] font-black uppercase text-rose-700 block">Wrong Answers</span>
+                    <span id="res-wrong" class="text-3xl font-black text-rose-600">0</span>
+                    <span class="text-[10px] text-slate-500 font-bold block">questions</span>
+                </div>
+
+                <div class="bg-amber-50 border-2 border-slate-900 rounded-2xl p-3 text-center shadow-fun-sm">
+                    <span class="text-[11px] font-black uppercase text-amber-700 block">Violations</span>
+                    <span id="res-violations" class="text-3xl font-black text-amber-600">0</span>
+                    <span class="text-[10px] text-slate-500 font-bold block">tab switches</span>
+                </div>
+            </div>
+
+            <!-- Student Info Summary Bar -->
+            <div class="bg-slate-100 border-2 border-slate-900 rounded-xl p-3 mb-6 flex flex-wrap items-center justify-between text-xs font-bold gap-2">
+                <div><i class="fa-solid fa-user text-brand-purple mr-1"></i> Student: <span id="res-student-name" class="text-slate-900">Name</span></div>
+                <div><i class="fa-solid fa-school text-brand-blue mr-1"></i> Class: <span id="res-student-class" class="text-slate-900">Class</span></div>
+                <div><i class="fa-solid fa-clock text-amber-600 mr-1"></i> Time Taken: <span id="res-time-taken" class="text-slate-900">0m 0s</span></div>
+            </div>
+
+            <!-- GAS Status Bar -->
+            <div id="gas-status-card" class="mb-6 p-3 rounded-xl border-2 border-slate-900 text-xs font-bold flex items-center justify-between bg-blue-50 text-blue-800">
+                <span class="flex items-center gap-2">
+                    <i id="gas-spinner" class="fa-solid fa-spinner fa-spin"></i>
+                    <span id="gas-status-text">Submitting results to Google Sheets...</span>
+                </span>
+                <button id="gas-retry-btn" onclick="submitResultsToGAS()" class="hidden px-2.5 py-1 bg-blue-600 text-white rounded-lg text-[11px] hover:bg-blue-700">Retry</button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-3">
+                <button onclick="toggleReviewMode()" class="flex-1 py-3 bg-brand-blue hover:bg-blue-600 text-white font-extrabold rounded-2xl border-2 border-slate-900 shadow-fun-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass font-black"></i>
+                    <span id="btn-review-text">Review Questions & Answers</span>
+                </button>
+                <button onclick="resetAppToStart()" class="py-3 px-6 bg-slate-800 hover:bg-slate-900 text-white font-extrabold rounded-2xl border-2 border-slate-900 shadow-fun-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Back to Home</span>
+                </button>
+            </div>
+
+            <!-- Review Panel Section (Hidden by default) -->
+            <div id="review-panel" class="hidden mt-6 border-t-4 border-slate-900 pt-6 space-y-4">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-brand-blue"></i> Question-by-Question Review
+                </h3>
+                <div id="review-items-container" class="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t-2 border-slate-900 py-3 text-center text-xs font-bold text-slate-500">
+        Grade 8 English Assessment Game • Kurikulum Merdeka (Fase D)
+    </footer>
+
+
+    <!-- ================= MODALS & POPUPS ================= -->
+    <!-- Cheating Warning Modal -->
+    <div id="modal-violation" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border-4 border-slate-900 rounded-3xl p-6 max-w-md w-full shadow-fun-lg text-center animate-bounce-gentle">
+            <div class="w-16 h-16 mx-auto bg-red-100 border-4 border-slate-900 rounded-2xl flex items-center justify-center text-red-600 text-3xl mb-4 shadow-fun-sm">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-xl font-black text-red-600 uppercase">Warning: Cheating Detected!</h3>
+            <p class="text-sm font-medium text-slate-700 mt-2">
+                You switched tabs or left the assessment window. Leaving the assessment window is strictly forbidden!
+            </p>
+            <div class="my-4 p-3 bg-red-50 border-2 border-red-300 rounded-2xl">
+                <span class="text-xs font-extrabold text-red-700 block uppercase">Violation Counter</span>
+                <span id="modal-violation-count" class="text-2xl font-black text-red-600">1 / 3</span>
+            </div>
+            <p id="modal-violation-msg" class="text-xs text-slate-500 font-semibold mb-5">
+                Note: Reaching 3 violations will automatically invalidate your attempt and return to the main screen.
+            </p>
+            <button onclick="closeViolationModal()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold border-2 border-slate-900 rounded-xl shadow-fun-sm transition">
+                I Understand & Continue Test
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirm Submit Modal -->
+    <div id="modal-confirm-submit" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border-4 border-slate-900 rounded-3xl p-6 max-w-md w-full shadow-fun-lg text-center">
+            <div class="w-14 h-14 mx-auto bg-amber-100 border-4 border-slate-900 rounded-2xl flex items-center justify-center text-amber-600 text-2xl mb-3 shadow-fun-sm">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-800">Submit Assessment?</h3>
+            <p id="modal-confirm-text" class="text-xs md:text-sm text-slate-600 font-medium mt-2">
+                Are you sure you want to finish? Make sure you have reviewed all your answers.
+            </p>
+            <div class="flex gap-3 mt-5">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold border-2 border-slate-900 rounded-xl text-xs transition">
+                    Keep Working
+                </button>
+                <button onclick="executeFinalSubmit()" class="flex-1 py-2.5 bg-brand-green hover:bg-emerald-600 text-white font-extrabold border-2 border-slate-900 rounded-xl text-xs shadow-fun-sm transition">
+                    Yes, Submit Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Guide & GAS Code Modal -->
+    <div id="modal-teacher" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border-4 border-slate-900 rounded-3xl p-6 max-w-2xl w-full max-h-[85vh] flex flex-col shadow-fun-lg">
+            <div class="flex items-center justify-between border-b-2 border-slate-200 pb-3 mb-3">
+                <h3 class="font-black text-lg text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-code text-brand-blue"></i> Teacher Setup Guide: Google Apps Script
+                </h3>
+                <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-slate-800 text-xl font-bold">&times;</button>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar pr-2 space-y-4 text-xs text-slate-700 leading-relaxed flex-grow">
+                <div class="bg-amber-50 border border-amber-300 p-3 rounded-xl text-amber-800">
+                    <strong>Instructions:</strong>
+                    <ol class="list-decimal list-inside space-y-1 mt-1 font-medium">
+                        <li>Create a new <strong>Google Sheet</strong> in your Google Drive.</li>
+                        <li>Click <strong>Extensions &gt; Apps Script</strong>.</li>
+                        <li>Delete any existing code and paste the exact Google Apps Script code below into <code class="bg-amber-200 px-1 rounded">Code.gs</code>.</li>
+                        <li>Click <strong>Deploy &gt; New deployment</strong>.</li>
+                        <li>Select type: <strong>Web App</strong>. Set "Execute as": <strong>Me</strong>, and "Who has access": <strong>Anyone</strong>.</li>
+                        <li>Copy the generated <strong>Web App URL</strong> and paste it into the <code class="bg-amber-200 px-1 rounded">GAS_WEB_APP_URL</code> variable near line 25 of this HTML file!</li>
+                    </ol>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-extrabold uppercase text-slate-800">Google Apps Script Code (.gs)</span>
+                        <button onclick="copyGasCode()" class="px-2 py-1 bg-slate-800 text-white rounded text-[10px] font-bold hover:bg-slate-700">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy Code
+                        </button>
+                    </div>
+                    <pre id="gas-script-code" class="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono text-[11px] overflow-x-auto whitespace-pre">
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // Set up headers if empty
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Timestamp", 
+        "Nama", 
+        "Kelas", 
+        "Benar", 
+        "Salah", 
+        "Skor Akhir", 
+        "Jumlah Pelanggaran", 
+        "No Soal Salah"
+      ]);
+    }
+    
+    var data = JSON.parse(e.postData.contents);
+    
+    sheet.appendRow([
+      data.timestamp || new Date().toLocaleString(),
+      data.nama || "",
+      data.kelas || "",
+      data.benar || 0,
+      data.salah || 0,
+      data.skor || 0,
+      data.pelanggaran || 0,
+      data.noSoalSalah || "-"
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+                    </pre>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t-2 border-slate-200 text-right mt-3">
+                <button onclick="closeTeacherModal()" class="px-4 py-2 bg-slate-800 text-white font-extrabold rounded-xl text-xs">Close Guide</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT APP ENGINE ================= -->
+    <script>
+        /* ================= QUESTION DATABASE (30 QUESTIONS - GRADE 8 UNIT 3: A HELPING HAND) ================= */
+        const QUESTIONS = [
+            // --- 1 - 10: Character Traits, Behaviors & Basic Comprehension in Friendship Narratives ---
+            {
+                id: 1,
+                level: "Easy",
+                topic: "Describing Character Traits",
+                passage: "Story Excerpt:\nWhen Maya noticed that her classmate Leo was sitting alone during recess looking confused with his math homework, she walked over with a big smile. She spent twenty minutes explaining the equations patiently until Leo finally understood.",
+                prompt: "Based on the text, which adjective BEST describes Maya's trait and behavior?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Kind and helpful", choiceImage: "" },
+                    { key: "B", text: "Selfish and impatient", choiceImage: "" },
+                    { key: "C", text: "Arrogant and bossy", choiceImage: "" },
+                    { key: "D", text: "Careless and lazy", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "Maya noticed Leo needed help and patiently spent her recess explaining the math homework, showing kindness and helpfulness."
+            },
+            {
+                id: 2,
+                level: "Easy",
+                topic: "Narrative Plot Details",
+                passage: "Dialogue:\nAris: Why were you late for school today, Bima?\nBima: On my way to school, I saw an old woman who dropped all her grocery bags on the sidewalk. I stopped to help her pick everything up and carried them to her front gate.",
+                prompt: "Why was Bima late for school?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "He woke up late because he played games.", choiceImage: "" },
+                    { key: "B", text: "He stopped to help an old woman pick up her dropped groceries.", choiceImage: "" },
+                    { key: "C", text: "He got lost while riding his bicycle to school.", choiceImage: "" },
+                    { key: "D", text: "He went to a store to buy some snacks.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Bima directly states that he stopped on his way to help an old woman pick up her dropped grocery bags."
+            },
+            {
+                id: 3,
+                level: "Easy",
+                topic: "Describing Character Traits",
+                passage: "Story Excerpt:\nDuring the class science project, Riko refused to share his materials with his group members. When his teammates made a small mistake, he yelled at them and demanded that he take total control of the project.",
+                prompt: "Which character trait is shown by Riko in the story?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Generous and cooperative", choiceImage: "" },
+                    { key: "B", text: "Bossy and uncooperative", choiceImage: "" },
+                    { key: "C", text: "Polite and modest", choiceImage: "" },
+                    { key: "D", text: "Humble and shy", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Riko refused to share materials, yelled at teammates, and demanded total control, demonstrating bossy and uncooperative traits."
+            },
+            {
+                id: 4,
+                level: "Medium",
+                topic: "Inferring Behavior & Motivation",
+                passage: "Story Excerpt:\nDoni knew his friend Farhan had been absent for three days due to dengue fever. Every afternoon after school, Doni took neat notes in his notebook and brought them to Farhan's house so Farhan would not fall behind in class.",
+                prompt: "What motivated Doni to take neat notes every day?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "He wanted to get extra points from his teacher.", choiceImage: "" },
+                    { key: "B", text: "He wanted to sell his notes to Farhan.", choiceImage: "" },
+                    { key: "C", text: "He was concerned about his sick friend and wanted to help him study.", choiceImage: "" },
+                    { key: "D", text: "He was forced by his class teacher.", choiceImage: "" }
+                ],
+                answerKey: "C",
+                explanation: "Doni showed care for his sick friend by taking neat notes so Farhan wouldn't fall behind in school work."
+            },
+            {
+                id: 5,
+                level: "Medium",
+                topic: "Narrative Elements - Setting & Mood",
+                passage: "Story Excerpt:\nIt was a rainy Friday afternoon. Heavy rain poured outside, and thunder boomed across the schoolyard. Inside the empty classroom, Sinta and Tara sat together under a dim light, sharing a warm thermos of tea while fixing their ruined art poster.",
+                prompt: "What is the atmosphere/setting of the scene described in the passage?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "A bright and cheerful sunny morning on the sports field.", choiceImage: "" },
+                    { key: "B", text: "A stormy afternoon inside a quiet classroom where friends support each other.", choiceImage: "" },
+                    { key: "C", text: "A noisy and crowded school canteen during lunchtime.", choiceImage: "" },
+                    { key: "D", text: "A dark and scary forest during the night.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "The text describes a rainy, stormy Friday afternoon in an empty classroom where Sinta and Tara warmly assist each other."
+            },
+            {
+                id: 6,
+                level: "Medium",
+                topic: "Describing Character Traits",
+                passage: "Story Excerpt:\nAlthough Sarah won first place in the speech competition, she did not boast. Instead, she praised her runner-up opponent, Nabila, saying, 'Nabila gave an incredible presentation, and I learned so much from her.'",
+                prompt: "How can Sarah's character best be described?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Humble and respectful", choiceImage: "" },
+                    { key: "B", text: "Proud and greedy", choiceImage: "" },
+                    { key: "C", text: "Dishonest and sly", choiceImage: "" },
+                    { key: "D", text: "Insecure and fearful", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "Sarah's refusal to boast and her praise for her opponent highlight her humility and respectfulness."
+            },
+            {
+                id: 7,
+                level: "Easy",
+                topic: "Identifying Moral Lesson",
+                passage: "Fable Excerpt: 'The Mouse and the Elephant'\nA tiny mouse freed a huge trapped elephant by chewing through the heavy ropes. The elephant realized that even small friends can render great assistance.",
+                prompt: "What moral lesson does the fable teach us?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Big animals should never talk to small animals.", choiceImage: "" },
+                    { key: "B", text: "Never underestimate a friend regardless of their size.", choiceImage: "" },
+                    { key: "C", text: "Ropes are easily destroyed by elephants.", choiceImage: "" },
+                    { key: "D", text: "Always avoid trapped animals in the forest.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "The fable illustrates that anyone, regardless of size or appearance, can be a true and helpful friend."
+            },
+            {
+                id: 8,
+                level: "Medium",
+                topic: "Analyzing Action & Response",
+                passage: "Story Excerpt:\nWhen Fajar dropped his wallet on the school floor, Hendra picked it up. Hendra saw that it contained a 100,000 rupiah note. Hendra immediately ran after Fajar and returned the wallet intact.",
+                prompt: "Which character quality does Hendra demonstrate?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Honesty and integrity", choiceImage: "" },
+                    { key: "B", text: "Cleverness and trickery", choiceImage: "" },
+                    { key: "C", text: "Bravery and speed", choiceImage: "" },
+                    { key: "D", text: "Curiosity and greed", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "Hendra returned the wallet immediately without taking anything, showing honesty and integrity."
+            },
+            {
+                id: 9,
+                level: "Medium",
+                topic: "Vocabulary in Narrative Context",
+                passage: "Sentence:\n'Deni was deeply **relieved** when his friend Bagus offered to lend him his spare helmet so they could ride together.'",
+                prompt: "What is the synonym of the bold word 'relieved' in this context?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Comforted / Reassured", choiceImage: "" },
+                    { key: "B", text: "Terrified / Scared", choiceImage: "" },
+                    { key: "C", text: "Furious / Angry", choiceImage: "" },
+                    { key: "D", text: "Disappointed / Sad", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "'Relieved' means feeling at ease and comforted after anxiety or worry is removed."
+            },
+            {
+                id: 10,
+                level: "Medium",
+                topic: "Describing Behavior from Dialogue",
+                passage: "Dialogue:\nKiki: 'Don't worry about breaking my pencil, Ryan! It was an accident. Here, you can borrow my extra mechanical pencil for the exam.'\nRyan: 'Thank you so much, Kiki! You are so understanding.'",
+                prompt: "What behavior does Kiki display towards Ryan?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "She gets angry and demands compensation.", choiceImage: "" },
+                    { key: "B", text: "She forgives him easily and offers a helpful solution.", choiceImage: "" },
+                    { key: "C", text: "She complains to the exam supervisor.", choiceImage: "" },
+                    { key: "D", text: "She ignores Ryan and leaves the room.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Kiki reassures Ryan that it was an accident and generously lends him her extra pencil."
+            },
+
+            // --- 11 - 20: Narrative Text Structure, Cause & Effect, & Character Inferences ---
+            {
+                id: 11,
+                level: "Medium",
+                topic: "Narrative Text - Structure (Orientation)",
+                passage: "Text Paragraph:\n'Once upon a time, in a small peaceful village near Mount Merapi, lived two best friends named Edo and Galang. They were both 14 years old and shared a great passion for hiking and outdoor adventures.'",
+                prompt: "Which part of a narrative text structure is represented by this paragraph?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Orientation (introducing characters, time, and setting)", choiceImage: "" },
+                    { key: "B", text: "Complication (introducing the main problem)", choiceImage: "" },
+                    { key: "C", text: "Resolution (solving the problem)", choiceImage: "" },
+                    { key: "D", text: "Coda (final moral lesson)", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "The paragraph introduces the characters (Edo and Galang), setting (village near Mount Merapi), and time (Once upon a time), which is the Orientation."
+            },
+            {
+                id: 12,
+                level: "Hard",
+                topic: "Narrative Text - Complication Analysis",
+                passage: "Story Excerpt:\n'As Edo and Galang were walking back from the forest, dark clouds covered the sky and heavy rain started falling. Suddenly, Galang slipped on a muddy slope and injured his ankle. He couldn't stand up or walk. The sun was setting fast, and temperature was dropping.'",
+                prompt: "What is the main **complication** (problem) in this narrative snippet?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Edo and Galang lost their hiking equipment.", choiceImage: "" },
+                    { key: "B", text: "Galang slipped, hurt his ankle, and couldn't walk in bad weather at sunset.", choiceImage: "" },
+                    { key: "C", text: "A wild animal attacked them in the forest.", choiceImage: "" },
+                    { key: "D", text: "Galang forgot to bring his jacket.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "The complication arises when Galang injures his ankle on a muddy slope during heavy rain as sunset approaches."
+            },
+            {
+                id: 13,
+                level: "Hard",
+                topic: "Narrative Text - Resolution Analysis",
+                passage: "Refer to the story of Edo and Galang in Question #12:\n'Edo refused to leave his friend behind. He carefully wrapped Galang's ankle with a scarf, created a sturdy wooden crutch from a tree branch, and patiently supported Galang as they walked slowly step-by-step until they reached the village safely.'",
+                prompt: "How did Edo resolve the crisis in the story?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "He ran home alone and left Galang waiting in the dark.", choiceImage: "" },
+                    { key: "B", text: "He wrapped the ankle, made a crutch, and helped Galang walk back safely.", choiceImage: "" },
+                    { key: "C", text: "He shouted for help until villagers arrived with a helicopter.", choiceImage: "" },
+                    { key: "D", text: "He built a tent and decided to live in the forest permanently.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Edo demonstrated loyalty and resourcefulness by treating Galang's injury, crafting a makeshift crutch, and assisting him home."
+            },
+            {
+                id: 14,
+                level: "Medium",
+                topic: "Cause and Effect in Stories",
+                passage: "Story Excerpt:\n'Nisa was nervous about performing her traditional dance at the school cultural show. Seeing Nisa trembling backstage, her friend Dewi held her hands, gave her encouraging words, and rehearsed the first dance steps together with her.'",
+                prompt: "What was the direct **effect** of Dewi holding Nisa's hands and encouraging her?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Nisa canceled her performance and went home.", choiceImage: "" },
+                    { key: "B", text: "Nisa felt supported and gained the courage to perform on stage.", choiceImage: "" },
+                    { key: "C", text: "Dewi replaced Nisa as the lead dancer.", choiceImage: "" },
+                    { key: "D", text: "Nisa became angry at Dewi for interrupting her.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Dewi's comforting behavior helped relieve Nisa's nerves, giving her confidence and courage to perform."
+            },
+            {
+                id: 15,
+                level: "Medium",
+                topic: "Describing Trait Transformation",
+                passage: "Story Excerpt:\nIn the beginning, Bayu was known as a stubborn boy who never listened to anyone. However, after his team lost the basketball match because he refused to pass the ball, he realized his mistake. He apologized to his teammates and learned to pass and play as a true team player.",
+                prompt: "How did Bayu's character trait change throughout the story?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "From a selfish, stubborn player to a cooperative team player.", choiceImage: "" },
+                    { key: "B", text: "From a humble boy to an arrogant star player.", choiceImage: "" },
+                    { key: "C", text: "From a cheerful student to a quiet, sad child.", choiceImage: "" },
+                    { key: "D", text: "He remained selfish and stubborn until the end.", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "Bayu learned from his mistake, apologized, and transformed from stubborn/selfish to a cooperative team player."
+            },
+            {
+                id: 16,
+                level: "Hard",
+                topic: "Inferring Unstated Character Feelings",
+                passage: "Story Excerpt:\nTania stood by the school gate with her head down, clutching her torn backpack. Her eyes were red. When her friend Dina approached and asked what happened, Tania squeezed Dina's hand tightly without saying a word, and tears rolled down her cheeks.",
+                prompt: "What can be inferred about Tania's emotional state?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "She was overjoyed and excited about a surprise gift.", choiceImage: "" },
+                    { key: "B", text: "She was feeling deeply upset, hurt, and comforted by her friend's presence.", choiceImage: "" },
+                    { key: "C", text: "She was sleepy and bored after class.", choiceImage: "" },
+                    { key: "D", text: "She was angry at Dina for talking to her.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Tania's physical actions (head down, red eyes, squeezing Dina's hand, crying) signal deep sadness and comfort from her friend."
+            },
+            {
+                id: 17,
+                level: "Medium",
+                topic: "Identifying Supporting Characters",
+                passage: "Story Excerpt:\n'Randi was determined to build a mini robot for the regional STEM competition. Whenever Randi felt like giving up after failed attempts, his elder sister Lina would bring him hot chocolate and remind him of his potential.'",
+                prompt: "What role does sister Lina play in Randi's story?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "The antagonist who sabotaged his robot.", choiceImage: "" },
+                    { key: "B", text: "A supportive character who motivated and encouraged the protagonist.", choiceImage: "" },
+                    { key: "C", text: "The main judge of the STEM competition.", choiceImage: "" },
+                    { key: "D", text: "A rival competitor from another school.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Lina plays a supportive role, comforting and encouraging Randi whenever he faces obstacles."
+            },
+            {
+                id: 18,
+                level: "Hard",
+                topic: "Analyzing Action vs Words",
+                passage: "Story Excerpt:\n'Kevin always boasted to everyone, \"I am the most loyal friend you will ever have!\" However, when his friend Andre was unfairly accused of breaking a classroom window, Kevin ran away and pretended he didn't know Andre.'",
+                prompt: "What does the contrast between Kevin's words and actions reveal about his character?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "He is truly brave and protective.", choiceImage: "" },
+                    { key: "B", text: "He is hypocritical and insincere in his friendship.", choiceImage: "" },
+                    { key: "C", text: "He is shy and quiet.", choiceImage: "" },
+                    { key: "D", text: "He is very smart at solving problems.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Kevin boasts about loyalty but deserts his friend in a time of trouble, showing hypocrisy and insincerity."
+            },
+            {
+                id: 19,
+                level: "Medium",
+                topic: "Understanding Idioms in Friendship Context",
+                passage: "Sentence:\n'True friends are those who **stand by your side** through thick and thin.'",
+                prompt: "What does the expression **'stand by your side'** mean in this context?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Physically standing next to someone without talking.", choiceImage: "" },
+                    { key: "B", text: "Supporting and remaining loyal to someone during difficult times.", choiceImage: "" },
+                    { key: "C", text: "Pushing someone out of the way.", choiceImage: "" },
+                    { key: "D", text: "Taking someone else's place in an exam.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "The idiom 'stand by your side' means offering continuous support, loyalty, and companionship through hard times."
+            },
+            {
+                id: 20,
+                level: "Hard",
+                topic: "Evaluating Problem Solving Behavior",
+                passage: "Story Excerpt:\nTwo friends, Andi and Budi, were preparing a presentation. They had completely different opinions on which topic to choose and began arguing heatedly. Instead of yelling, Andi said, 'Let's list the pros and cons of both topics and vote fairly.' Budi agreed, and they completed their work smoothly.",
+                prompt: "Why was Andi's approach to resolving the argument effective?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Because he forced Budi to accept his opinion without discussion.", choiceImage: "" },
+                    { key: "B", text: "Because he used a calm, logical, and democratic approach to resolve conflict.", choiceImage: "" },
+                    { key: "C", text: "Because he walked away and left Budi to do all the work.", choiceImage: "" },
+                    { key: "D", text: "Because he complained to the teacher immediately.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Andi suggested listing pros and cons and voting fairly, which is a calm, logical, and democratic way to solve conflicts."
+            },
+
+            // --- 21 - 30: HOTS Analysis, Text Synthesis, Reordering & Comparative Reading ---
+            {
+                id: 21,
+                level: "Hard (HOTS)",
+                topic: "Comparative Character Analysis",
+                passage: "Read the character descriptions:\nCharacter A (Rian): Helps others only when there are reward vouchers or public recognition.\nCharacter B (Fikri): Secretly cleans the laboratory equipment after class so the next class can use it easily, without telling anyone.",
+                prompt: "Comparing Rian and Fikri, who exhibits **genuine altruism** (selfless helping behavior)?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Rian, because he gets vouchers.", choiceImage: "" },
+                    { key: "B", text: "Fikri, because he helps selflessly without expecting praise or reward.", choiceImage: "" },
+                    { key: "C", text: "Both show equal selfless behavior.", choiceImage: "" },
+                    { key: "D", text: "Neither of them shows good behavior.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Fikri performs helpful deeds quietly without seeking recognition or reward, showing genuine altruism."
+            },
+            {
+                id: 22,
+                level: "Hard (HOTS)",
+                topic: "Reconstructing Narrative Sequence",
+                passage: "Jumbled Sentences:\n1. Suddenly, a stray dog started barking aggressively at her.\n2. Sinta was walking home alone after her late tutoring session.\n3. Grateful for his quick action, Sinta thanked Tomi and felt safe again.\n4. Seeing Sinta in danger, her neighbor Tomi quickly ran over with a stick and shooed the dog away.",
+                prompt: "Arranged in proper narrative order, the correct sequence is:",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "2 - 1 - 4 - 3", choiceImage: "" },
+                    { key: "B", text: "1 - 2 - 3 - 4", choiceImage: "" },
+                    { key: "C", text: "2 - 4 - 1 - 3", choiceImage: "" },
+                    { key: "D", text: "4 - 1 - 2 - 3", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "Order: 2 (Orientation) -> 1 (Complication) -> 4 (Helpful Action) -> 3 (Resolution & Gratitude)."
+            },
+            {
+                id: 23,
+                level: "Hard (HOTS)",
+                topic: "Predicting Logical Outcomes",
+                passage: "Story Scenario:\nDina borrowed her best friend Hana's favorite storybook. Unfortunately, Dina accidentally spilled grape juice on the cover, staining it badly. Dina feels terrified of Hana's reaction.",
+                prompt: "Based on the theme of 'A Helping Hand & True Friendship', what is the MOST responsible action Dina should take?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Hide the book in her school locker and pretend she lost it.", choiceImage: "" },
+                    { key: "B", text: "Honestly apologize to Hana, explain what happened, and replace the book with a new copy.", choiceImage: "" },
+                    { key: "C", text: "Blame her younger brother for spilling the juice.", choiceImage: "" },
+                    { key: "D", text: "Throw the book in the trash and ignore Hana's text messages.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Responsible friendship requires honesty, sincere apology, and taking responsibility by replacing the ruined book."
+            },
+            {
+                id: 24,
+                level: "Hard (HOTS)",
+                topic: "Evaluating Narrative Theme",
+                passage: "Story Summary:\nAn old fable tells of a lion who spared a small rat's life. Later, when hunters caught the lion in a strong net, the rat returned and chewed through the cords to set the lion free. The lion thanked the rat warmly.",
+                prompt: "Which proverb BEST summarizes the main theme of this narrative?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "A kindness done is never wasted.", choiceImage: "" },
+                    { key: "B", text: "Too many cooks spoil the broth.", choiceImage: "" },
+                    { key: "C", text: "Actions speak louder than words in sports.", choiceImage: "" },
+                    { key: "D", text: "Early bird catches the worm.", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "'A kindness done is never wasted' perfectly aligns with the lion's mercy returning to save him later through the rat."
+            },
+            {
+                id: 25,
+                level: "Hard (HOTS)",
+                topic: "Analyzing Dialogue Subtext",
+                passage: "Dialogue:\nTeacher: 'Who cleaned the blackboard and arranged the chairs so nicely this morning?'\nClass: (Silence)\nLina: (Glancing at Eko with a smile) 'Someone who comes early every day and never brags about it, Ma'am!'",
+                prompt: "What does Lina's statement imply about Eko?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Eko is lazy and always late.", choiceImage: "" },
+                    { key: "B", text: "Eko is the humble person who quietly cleaned the classroom.", choiceImage: "" },
+                    { key: "C", text: "Eko broke the blackboard.", choiceImage: "" },
+                    { key: "D", text: "Eko wants to be the class captain.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Lina's glance and comment subtly praise Eko as the humble student responsible for the clean classroom."
+            },
+            {
+                id: 26,
+                level: "Hard (HOTS)",
+                topic: "Identifying Point of View & Trait Impact",
+                passage: "Excerpt:\n'I watched my friend Melati step up to the podium. Her hands were shaking, but when she looked at me in the audience, I gave her two thumbs up and nodded. She took a deep breath and spoke with incredible confidence.'",
+                prompt: "From whose perspective is the story told, and what impact did the narrator have on Melati?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "First-person perspective; the narrator provided silent visual encouragement that boosted Melati's confidence.", choiceImage: "" },
+                    { key: "B", text: "Third-person perspective; the narrator made Melati forget her speech.", choiceImage: "" },
+                    { key: "C", text: "First-person perspective; the narrator interrupted Melati's speech.", choiceImage: "" },
+                    { key: "D", text: "Second-person perspective; the narrator was the speaker on stage.", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "The text uses 'I' (first person perspective) and describes how a supportive gesture gave Melati confidence."
+            },
+            {
+                id: 27,
+                level: "Hard (HOTS)",
+                topic: "Critical Reading - Identifying Misbehavior",
+                passage: "Story Snippet:\n'During the group assignment, Tari spent the entire hour scrolling on her smartphone while her teammates, Maya and Johan, worked hard gathering data. When the teacher complimented the project, Tari jumped up and claimed she did most of the work.'",
+                prompt: "Which term BEST describes Tari's behavior?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Free-riding and dishonesty", choiceImage: "" },
+                    { key: "B", text: "Dedication and leadership", choiceImage: "" },
+                    { key: "C", text: "Modesty and teamwork", choiceImage: "" },
+                    { key: "D", text: "Creativity and innovation", choiceImage: "" }
+                ],
+                answerKey: "A",
+                explanation: "Tari did zero work while taking credit for others' labor, which is free-riding and dishonest."
+            },
+            {
+                id: 28,
+                level: "Hard (HOTS)",
+                topic: "Synthesizing Conflict Resolution",
+                passage: "Story Excerpt:\nBagus accidentally knocked over his friend Gilang's science model, shattering the clay structure into pieces. Bagus immediately admitted his mistake, offered to stay late after school, and helped rebuild the model from scratch until it looked even better than before.",
+                prompt: "What key elements contributed to fixing both the project and their friendship?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Blaming someone else and walking away quickly.", choiceImage: "" },
+                    { key: "B", text: "Immediate accountability, genuine effort, and practical restitution.", choiceImage: "" },
+                    { key: "C", text: "Buying a expensive gift without fixing the model.", choiceImage: "" },
+                    { key: "D", text: "Ignoring the broken model and talking about football.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Bagus admitted fault (accountability), spent time helping (effort), and rebuilt the model (restitution)."
+            },
+            {
+                id: 29,
+                level: "Hard (HOTS)",
+                topic: "Inference of Character Motivation",
+                passage: "Story Excerpt:\nEvery Friday, 14-year-old Fariz uses his pocket money to buy extra loaves of bread. On his way home, he gives them to an elderly scavenger who rests under the bridge. Fariz never tells his classmates or posts about it on social media.",
+                prompt: "Why does Fariz keep his charitable actions private?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "Because he is ashamed of giving bread.", choiceImage: "" },
+                    { key: "B", text: "Because he helps out of genuine empathy rather than for public approval.", choiceImage: "" },
+                    { key: "C", text: "Because his parents forbade him from posting online.", choiceImage: "" },
+                    { key: "D", text: "Because he doesn't own a smartphone.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Fariz acts out of sincere empathy and compassion, not for social media clout or public praise."
+            },
+            {
+                id: 30,
+                level: "Hard (HOTS)",
+                topic: "Evaluating Moral & Character Impact",
+                passage: "Full Story Reading:\n'When new student David joined Class 8B, he spoke with a different regional accent and sat timidly at the back. Some students giggled, but Alif walked over, sat next to David, introduced him to the class, and invited him to join the football team. By the end of the term, David felt completely welcomed and was one of the top students in class.'",
+                prompt: "What was the long-term impact of Alif's welcoming behavior on David?",
+                imageUrl: "",
+                options: [
+                    { key: "A", text: "David felt isolated and decided to move to another school.", choiceImage: "" },
+                    { key: "B", text: "Alif's inclusiveness helped David feel accepted, comfortable, and thrive academically and socially.", choiceImage: "" },
+                    { key: "C", text: "David stopped playing football completely.", choiceImage: "" },
+                    { key: "D", text: "Alif lost all his old friends because he talked to David.", choiceImage: "" }
+                ],
+                answerKey: "B",
+                explanation: "Alif's empathetic and inclusive friendship helped the new student transition smoothly, feel welcomed, and succeed."
+            }
+        ];
+
+        /* ================= STATE MANAGEMENT ================= */
+        let currentState = {
+            studentName: "",
+            studentClass: "",
+            currentQuestionIndex: 0,
+            userAnswers: {},  // { questionId: 'A'|'B'|'C'|'D' }
+            doubtStatus: {},  // { questionId: true|false }
+            violationsCount: 0,
+            examStartTime: null,
+            examEndTime: null,
+            timerInterval: null,
+            remainingSeconds: 60 * 60, // 60 minutes
+            isExamActive: false,
+            reviewMode: false
+        };
+
+        /* ================= APPLICATION LIFECYCLE ================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            setupAntiCheatingListeners();
+        });
+
+        // Toggle passcode input visibility
+        function togglePasscodeVisibility() {
+            const input = document.getElementById('input-passcode');
+            const icon = document.getElementById('passcode-eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        /* ================= LOGIN & EXAM START ================= */
+        function handleStartExam(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('input-student-name').value.trim();
+            const classInput = document.getElementById('input-student-class').value;
+            const passcode = document.getElementById('input-passcode').value.trim();
+            const errorMsg = document.getElementById('login-error-msg');
+
+            if (passcode !== SYSTEM_PASSCODE) {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            errorMsg.classList.add('hidden');
+
+            // Set state
+            currentState.studentName = nameInput;
+            currentState.studentClass = classInput;
+            currentState.currentQuestionIndex = 0;
+            currentState.userAnswers = {};
+            currentState.doubtStatus = {};
+            currentState.violationsCount = 0;
+            currentState.remainingSeconds = 60 * 60; // 60 min
+            currentState.isExamActive = true;
+            currentState.examStartTime = new Date();
+
+            // UI Switch
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-exam').classList.remove('hidden');
+            document.getElementById('header-status-bar').classList.remove('hidden');
+
+            // Render Palette & First Question
+            renderPaletteGrid();
+            renderQuestion(0);
+            startTimer();
+        }
+
+        /* ================= TIMER CONTROLLER ================= */
+        function startTimer() {
+            clearInterval(currentState.timerInterval);
+            updateTimerDisplay();
+
+            currentState.timerInterval = setInterval(() => {
+                if (!currentState.isExamActive) return;
+
+                currentState.remainingSeconds--;
+                updateTimerDisplay();
+
+                if (currentState.remainingSeconds <= 0) {
+                    clearInterval(currentState.timerInterval);
+                    alert("Time's up! Your assessment will be submitted automatically.");
+                    executeFinalSubmit();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(currentState.remainingSeconds / 60);
+            const s = currentState.remainingSeconds % 60;
+            const formatted = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            const displayEl = document.getElementById('timer-display');
+            displayEl.textContent = formatted;
+
+            // Warning visual if time < 5 minutes
+            if (currentState.remainingSeconds <= 300) {
+                displayEl.parentElement.parentElement.classList.add('pulse-red');
+            } else {
+                displayEl.parentElement.parentElement.classList.remove('pulse-red');
+            }
+        }
+
+        /* ================= QUESTION RENDERING ENGINE ================= */
+        function renderQuestion(index) {
+            currentState.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+
+            // Badge updates
+            document.getElementById('question-number-badge').textContent = `Q #${index + 1} / ${QUESTIONS.length}`;
+            
+            const levelBadge = document.getElementById('question-level-badge');
+            levelBadge.textContent = q.level;
+            if (q.level.includes("Easy")) {
+                levelBadge.className = "px-2.5 py-1 bg-emerald-100 text-emerald-800 border-2 border-emerald-800 font-bold rounded-xl text-xs";
+            } else if (q.level.includes("Medium")) {
+                levelBadge.className = "px-2.5 py-1 bg-amber-100 text-amber-800 border-2 border-amber-800 font-bold rounded-xl text-xs";
+            } else {
+                levelBadge.className = "px-2.5 py-1 bg-rose-100 text-rose-800 border-2 border-rose-800 font-bold rounded-xl text-xs";
+            }
+
+            document.getElementById('question-topic-badge').textContent = q.topic;
+
+            // Doubt toggle status
+            updateDoubtButtonUI(q.id);
+
+            // Passage
+            const passageBox = document.getElementById('passage-container');
+            if (q.passage && q.passage.trim() !== "") {
+                document.getElementById('passage-text').innerText = q.passage;
+                passageBox.classList.remove('hidden');
+            } else {
+                passageBox.classList.add('hidden');
+            }
+
+            // Image
+            const imgBox = document.getElementById('question-image-box');
+            const imgEl = document.getElementById('question-image');
+            if (q.imageUrl && q.imageUrl.trim() !== "") {
+                imgEl.src = q.imageUrl;
+                imgBox.classList.remove('hidden');
+            } else {
+                imgBox.classList.add('hidden');
+            }
+
+            // Question prompt
+            document.getElementById('question-prompt').textContent = q.prompt;
+
+            // Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const selectedKey = currentState.userAnswers[q.id];
+
+            q.options.forEach(opt => {
+                const isSelected = (selectedKey === opt.key);
+                const optButton = document.createElement('button');
+                optButton.type = 'button';
+                optButton.onclick = () => selectOption(q.id, opt.key);
+
+                let btnStyle = "w-full text-left p-3.5 rounded-2xl border-2 font-semibold text-sm transition flex items-center justify-between gap-3 ";
+                if (isSelected) {
+                    btnStyle += "bg-blue-100 border-brand-blue text-brand-blue shadow-fun-sm font-extrabold";
+                } else {
+                    btnStyle += "bg-slate-50 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-800";
+                }
+
+                optButton.className = btnStyle;
+
+                let optContent = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl border-2 ${isSelected ? 'bg-brand-blue text-white border-slate-900' : 'bg-white text-slate-700 border-slate-400'} flex items-center justify-center font-black text-xs shrink-0">
+                            ${opt.key}
+                        </span>
+                        <span class="leading-snug">${opt.text}</span>
+                    </div>
+                `;
+
+                if (opt.choiceImage && opt.choiceImage.trim() !== "") {
+                    optContent += `<img src="${opt.choiceImage}" alt="Choice image" class="h-10 w-10 object-cover rounded-lg border border-slate-400">`;
+                }
+
+                optButton.innerHTML = optContent;
+                optionsContainer.appendChild(optButton);
+            });
+
+            // Navigation Button Visibility
+            document.getElementById('btn-prev').disabled = (index === 0);
+            
+            if (index === QUESTIONS.length - 1) {
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('btn-finish-exam').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-next').classList.remove('hidden');
+                document.getElementById('btn-finish-exam').classList.add('hidden');
+            }
+
+            updatePaletteItemHighlight(index);
+        }
+
+        /* ================= OPTION SELECTION ================= */
+        function selectOption(qId, key) {
+            if (!currentState.isExamActive) return;
+
+            currentState.userAnswers[qId] = key;
+            renderQuestion(currentState.currentQuestionIndex);
+            renderPaletteGrid();
+        }
+
+        /* ================= DOUBT / REVIEW TOGGLE ================= */
+        function toggleDoubtState() {
+            const qId = QUESTIONS[currentState.currentQuestionIndex].id;
+            currentState.doubtStatus[qId] = !currentState.doubtStatus[qId];
+            updateDoubtButtonUI(qId);
+            renderPaletteGrid();
+        }
+
+        function updateDoubtButtonUI(qId) {
+            const isDoubt = !!currentState.doubtStatus[qId];
+            const btn = document.getElementById('btn-toggle-doubt');
+            const icon = document.getElementById('doubt-icon');
+            const text = document.getElementById('doubt-text');
+
+            if (isDoubt) {
+                btn.className = "px-3 py-1 bg-amber-400 text-slate-900 font-black border-2 border-slate-900 rounded-xl text-xs flex items-center gap-1.5 shadow-fun-sm";
+                icon.className = "fa-solid fa-bookmark text-slate-900";
+                text.textContent = "Marked for Review";
+            } else {
+                btn.className = "px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border-2 border-slate-900 rounded-xl text-xs flex items-center gap-1.5 transition";
+                icon.className = "fa-regular fa-bookmark text-amber-700";
+                text.textContent = "Mark for Review";
+            }
+        }
+
+        /* ================= QUESTION PALETTE GRID ================= */
+        function renderPaletteGrid() {
+            const grid = document.getElementById('question-palette-grid');
+            grid.innerHTML = '';
+
+            let answeredCount = 0;
+
+            QUESTIONS.forEach((q, idx) => {
+                const isAnswered = !!currentState.userAnswers[q.id];
+                const isDoubt = !!currentState.doubtStatus[q.id];
+                const isCurrent = (idx === currentState.currentQuestionIndex);
+
+                if (isAnswered) answeredCount++;
+
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.onclick = () => renderQuestion(idx);
+
+                let classes = "h-10 rounded-xl border-2 text-xs font-black transition flex items-center justify-center relative shadow-fun-sm ";
+
+                if (isCurrent) {
+                    classes += "ring-4 ring-blue-300 ring-offset-1 ";
+                }
+
+                if (isDoubt) {
+                    classes += "bg-amber-400 text-slate-900 border-slate-900";
+                } else if (isAnswered) {
+                    classes += "bg-emerald-500 text-white border-slate-900";
+                } else {
+                    classes += "bg-slate-100 text-slate-700 border-slate-300 hover:border-slate-800";
+                }
+
+                item.className = classes;
+                item.textContent = idx + 1;
+
+                grid.appendChild(item);
+            });
+
+            document.getElementById('answered-count-badge').textContent = `${answeredCount} / ${QUESTIONS.length}`;
+        }
+
+        function updatePaletteItemHighlight(activeIndex) {
+            const items = document.getElementById('question-palette-grid').children;
+            for (let i = 0; i < items.length; i++) {
+                if (i === activeIndex) {
+                    items[i].classList.add('ring-4', 'ring-blue-300', 'ring-offset-1');
+                } else {
+                    items[i].classList.remove('ring-4', 'ring-blue-300', 'ring-offset-1');
+                }
+            }
+        }
+
+        /* ================= NEXT / PREVIOUS NAVIGATION ================= */
+        function goToNextQuestion() {
+            if (currentState.currentQuestionIndex < QUESTIONS.length - 1) {
+                renderQuestion(currentState.currentQuestionIndex + 1);
+            }
+        }
+
+        function goToPrevQuestion() {
+            if (currentState.currentQuestionIndex > 0) {
+                renderQuestion(currentState.currentQuestionIndex - 1);
+            }
+        }
+
+        /* ================= PROCTORING & ANTI-CHEATING ENGINE ================= */
+        function setupAntiCheatingListeners() {
+            window.addEventListener('blur', handleUserCheatingViolation);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    handleUserCheatingViolation();
+                }
+            });
+        }
+
+        function handleUserCheatingViolation() {
+            if (!currentState.isExamActive) return;
+
+            currentState.violationsCount++;
+            document.getElementById('header-violation-count').textContent = `${currentState.violationsCount} / 3`;
+            document.getElementById('modal-violation-count').textContent = `${currentState.violationsCount} / 3`;
+
+            if (currentState.violationsCount >= 3) {
+                // Max violations reached -> Reset session
+                alert("STRICT RULE VIOLATION: You left the exam window 3 times! Your assessment has been invalidated and reset.");
+                resetAppToStart();
+            } else {
+                // Show warning popup
+                document.getElementById('modal-violation').classList.remove('hidden');
+            }
+        }
+
+        function closeViolationModal() {
+            document.getElementById('modal-violation').classList.add('hidden');
+        }
+
+        /* ================= SUBMIT & RESULT LOGIC ================= */
+        function confirmSubmitExam() {
+            const unanswered = QUESTIONS.length - Object.keys(currentState.userAnswers).length;
+            const textEl = document.getElementById('modal-confirm-text');
+
+            if (unanswered > 0) {
+                textEl.innerHTML = `You still have <strong class="text-rose-600">${unanswered} unanswered question(s)</strong>. Are you sure you want to finish now?`;
+            } else {
+                textEl.innerHTML = `You have answered all 30 questions! Are you ready to submit your assessment?`;
+            }
+
+            document.getElementById('modal-confirm-submit').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('modal-confirm-submit').classList.add('hidden');
+        }
+
+        function executeFinalSubmit() {
+            closeConfirmModal();
+            currentState.isExamActive = false;
+            currentState.examEndTime = new Date();
+            clearInterval(currentState.timerInterval);
+
+            // Calculate Score
+            let correctCount = 0;
+            const wrongQuestionNumbers = [];
+
+            QUESTIONS.forEach((q, idx) => {
+                const userAns = currentState.userAnswers[q.id];
+                if (userAns === q.answerKey) {
+                    correctCount++;
+                } else {
+                    wrongQuestionNumbers.push(idx + 1);
+                }
+            });
+
+            const wrongCount = QUESTIONS.length - correctCount;
+            const finalScore = Math.round((correctCount / QUESTIONS.length) * 100);
+
+            // Calculate Time Taken
+            const diffMs = currentState.examEndTime - currentState.examStartTime;
+            const diffMin = Math.floor(diffMs / 60000);
+            const diffSec = Math.floor((diffMs % 60000) / 1000);
+            const timeTakenStr = `${diffMin}m ${diffSec}s`;
+
+            // UI Updates on Result Screen
+            document.getElementById('res-score').textContent = finalScore;
+            document.getElementById('res-correct').textContent = correctCount;
+            document.getElementById('res-wrong').textContent = wrongCount;
+            document.getElementById('res-violations').textContent = currentState.violationsCount;
+
+            document.getElementById('res-student-name').textContent = currentState.studentName;
+            document.getElementById('res-student-class').textContent = currentState.studentClass;
+            document.getElementById('res-time-taken').textContent = timeTakenStr;
+
+            // Result Title Dynamic Styling
+            const iconBox = document.getElementById('result-icon-container');
+            const titleEl = document.getElementById('result-title');
+            if (finalScore >= 80) {
+                iconBox.textContent = "🏆";
+                titleEl.textContent = "Outstanding Work!";
+            } else if (finalScore >= 60) {
+                iconBox.textContent = "🌟";
+                titleEl.textContent = "Good Effort!";
+            } else {
+                iconBox.textContent = "📚";
+                titleEl.textContent = "Keep Practicing!";
+            }
+
+            // Switch Screen
+            document.getElementById('screen-exam').classList.add('hidden');
+            document.getElementById('header-status-bar').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            // Save summary references
+            currentState.summary = {
+                timestamp: new Date().toLocaleString(),
+                nama: currentState.studentName,
+                kelas: currentState.studentClass,
+                benar: correctCount,
+                salah: wrongCount,
+                skor: finalScore,
+                pelanggaran: currentState.violationsCount,
+                noSoalSalah: wrongQuestionNumbers.length > 0 ? wrongQuestionNumbers.join(', ') : "None"
+            };
+
+            // Post results to Google Apps Script
+            submitResultsToGAS();
+        }
+
+        /* ================= GAS HTTP POST INTEGRATION ================= */
+        function submitResultsToGAS() {
+            const statusCard = document.getElementById('gas-status-card');
+            const statusText = document.getElementById('gas-status-text');
+            const spinner = document.getElementById('gas-spinner');
+            const retryBtn = document.getElementById('gas-retry-btn');
+
+            if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.trim() === "") {
+                statusCard.className = "mb-6 p-3 rounded-xl border-2 border-amber-500 text-xs font-bold flex items-center justify-between bg-amber-50 text-amber-900";
+                spinner.className = "fa-solid fa-circle-info text-amber-600";
+                statusText.textContent = "Google Sheets sync is disabled (GAS_WEB_APP_URL not configured).";
+                retryBtn.classList.add('hidden');
+                return;
+            }
+
+            statusCard.className = "mb-6 p-3 rounded-xl border-2 border-slate-900 text-xs font-bold flex items-center justify-between bg-blue-50 text-blue-800";
+            spinner.className = "fa-solid fa-spinner fa-spin";
+            statusText.textContent = "Sending results to Google Sheets...";
+            retryBtn.classList.add('hidden');
+
+            // Send payload via fetch POST
+            fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Standard cross-origin setting for GAS Web Apps
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(currentState.summary)
+            })
+            .then(() => {
+                statusCard.className = "mb-6 p-3 rounded-xl border-2 border-emerald-500 text-xs font-bold flex items-center justify-between bg-emerald-50 text-emerald-800";
+                spinner.className = "fa-solid fa-circle-check text-emerald-600";
+                statusText.textContent = "Successfully submitted score to Google Sheets!";
+                retryBtn.classList.add('hidden');
+            })
+            .catch(err => {
+                console.error("GAS Submission Error:", err);
+                statusCard.className = "mb-6 p-3 rounded-xl border-2 border-rose-500 text-xs font-bold flex items-center justify-between bg-rose-50 text-rose-800";
+                spinner.className = "fa-solid fa-circle-xmark text-rose-600";
+                statusText.textContent = "Failed to sync with Google Sheets.";
+                retryBtn.classList.remove('hidden');
+            });
+        }
+
+        /* ================= REVIEW MODE ENGINE ================= */
+        function toggleReviewMode() {
+            const panel = document.getElementById('review-panel');
+            const btnText = document.getElementById('btn-review-text');
+
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                btnText.textContent = "Hide Review Panel";
+                renderReviewItems();
+            } else {
+                panel.classList.add('hidden');
+                btnText.textContent = "Review Questions & Answers";
+            }
+        }
+
+        function renderReviewItems() {
+            const container = document.getElementById('review-items-container');
+            container.innerHTML = '';
+
+            QUESTIONS.forEach((q, idx) => {
+                const userAns = currentState.userAnswers[q.id] || "Unanswered";
+                const isCorrect = (userAns === q.answerKey);
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border-2 text-xs font-medium space-y-2 ${isCorrect ? 'bg-emerald-50 border-emerald-400' : 'bg-rose-50 border-rose-400'}`;
+
+                let optionsListHtml = '';
+                q.options.forEach(opt => {
+                    let optClass = "p-2 rounded-lg border flex items-center justify-between ";
+                    if (opt.key === q.answerKey) {
+                        optClass += "bg-emerald-200 border-emerald-600 font-bold text-emerald-900";
+                    } else if (opt.key === userAns && !isCorrect) {
+                        optClass += "bg-rose-200 border-rose-600 font-bold text-rose-900";
+                    } else {
+                        optClass += "bg-white border-slate-200 text-slate-700";
+                    }
+
+                    optionsListHtml += `
+                        <div class="${optClass}">
+                            <span><strong>${opt.key}.</strong> ${opt.text}</span>
+                            ${opt.key === q.answerKey ? '<span class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Correct Key</span>' : ''}
+                            ${opt.key === userAns && !isCorrect ? '<span class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded-full font-bold">Your Answer</span>' : ''}
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-slate-900 text-sm">Question #${idx + 1} (${q.level})</span>
+                        <span class="px-2.5 py-0.5 rounded-full font-black text-[10px] uppercase ${isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}">
+                            ${isCorrect ? 'Correct (+1)' : 'Incorrect (0)'}
+                        </span>
+                    </div>
+
+                    ${q.passage ? `<div class="bg-white/80 p-2 rounded-lg border border-slate-300 font-mono text-[11px] text-slate-700 whitespace-pre-line">${q.passage}</div>` : ''}
+
+                    <p class="font-bold text-slate-800">${q.prompt}</p>
+
+                    <div class="space-y-1 mt-2">
+                        ${optionsListHtml}
+                    </div>
+
+                    <div class="bg-white p-2.5 rounded-xl border border-slate-300 mt-2 text-slate-700">
+                        <strong class="text-brand-blue"><i class="fa-solid fa-lightbulb mr-1"></i> Explanation:</strong> ${q.explanation}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        /* ================= RESET APP ================= */
+        function resetAppToStart() {
+            currentState.isExamActive = false;
+            clearInterval(currentState.timerInterval);
+            document.getElementById('modal-violation').classList.add('hidden');
+            document.getElementById('modal-confirm-submit').classList.add('hidden');
+            document.getElementById('screen-exam').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('header-status-bar').classList.add('hidden');
+            document.getElementById('screen-welcome').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+        }
+
+        /* ================= TEACHER MODAL ================= */
+        function openTeacherModal() {
+            document.getElementById('modal-teacher').classList.remove('hidden');
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('modal-teacher').classList.add('hidden');
+        }
+
+        function copyGasCode() {
+            const codeText = document.getElementById('gas-script-code').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert('Google Apps Script code copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
